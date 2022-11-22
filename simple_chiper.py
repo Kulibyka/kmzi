@@ -1,11 +1,8 @@
 import numpy
 
 alphabet = 'абвгдежзийклмнопрстуфхцчшщъыьэюя'
-secret_key = [['а', 'к'], ['б', 'н'], ['в', 'г'], ['г', 'ч'], ['д', 'ы'], ['е', 'ъ'], ['ж', 'и'],
-              ['з', 'л'], ['и', 'ш'], ['й', 'м'], ['к', 'ц'], ['л', 'щ'], ['м', 'а'], ['н', 'п'],
-              ['о', 'з'], ['п', 'с'], ['р', 'ф'], ['с', 'е'], ['т', 'ь'], ['у', 'х'], ['ф', 'о'],
-              ['х', 'д'], ['ц', 'в'], ['ч', 'э'], ['ш', 'р'], ['щ', 'й'], ['ъ', 'ю'], ['ы', 'ж'],
-              ['ь', 'у'], ['э', 'б'], ['ю', 'т'], ['я', 'я']]
+eng_alphabet = 'abcdefghijklmnopqrstuvwxyqz'
+secret_key = 'qwertyuiopasdfghjklzxcvbnm'
 
 
 def make_field(p, n):
@@ -131,17 +128,14 @@ def decode_aph_rec(message, key1, key2, f=(1, 1, -1, 0, 1, 1), p=2, n=5):
     return ''.join([alphabet[field.index(i)] if i in field else i for i in res])
 
 
-def encode_substitution(message, key: list):
-    global alphabet
-    key.sort(key=lambda x: x[0])
-    print(key)
-    return ''.join([alphabet[alphabet.index(key[alphabet.index(char)][1])] for char in message])
+def encode_substitution(message, key: str):
+    global eng_alphabet
+    return ''.join([key[eng_alphabet.index(char)] if char in key else char for char in message.lower()])
 
 
-def decode_substitution(message, key: list):
-    key = sorted([[i[1], i[0]] for i in key], key=lambda x: x[0])
-    print(key)
-    return ''.join([alphabet[alphabet.index(key[alphabet.index(char)][1])] for char in message])
+def decode_substitution(message, key: str):
+    global eng_alphabet
+    return ''.join([eng_alphabet[key.index(char)] if char in key else char for char in message.lower()])
 
 
 # z = make_field(2, 5)
@@ -158,7 +152,15 @@ def decode_substitution(message, key: list):
 # r = (encode_aph_rec("КЫФА ктоздесь", ('а', 'к'), ('е', 'н')))
 # print(r)
 # print(decode_aph_rec(r, ('й', 'к'), ('е', 'н')))
-# z = encode_substitution("секрет", secret_key)
+text = 'A man appeared on the corner the cat had been watching, appeared so suddenly and silently' \
+       ' you’d have thought he’d just popped out of the ground. The cat’s tail twitched and its eyes ' \
+       'narrowed. Nothing like this man had ever been seen on Privet Drive. He was tall, thin, and' \
+       ' very old, judging by the silver of his hair and beard, which were both long enough to tuck ' \
+       'into his belt. He was wearing long robes, a purple cloak that swept the ground, and high-heeled,' \
+       ' buckled boots. His blue eyes were light, bright, and sparkling behind half-moon spectacles and' \
+       ' his nose was very long and crooked, as though it had been broken at least twice. This man’s' \
+       ' name was Albus Dumbledore.'
+# z = encode_substitution(text, secret_key)
 # print(z)
 # print(decode_substitution(z, secret_key))
 
