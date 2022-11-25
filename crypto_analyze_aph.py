@@ -39,8 +39,8 @@ f = [1, 1, -1, 0, 1, 1]
 alpha_b = addition(field[alphabet.index('е')], field[alphabet.index('о')], 2, False)
 alpha_b = list(map(int, list(str(int(find_inverse_elem(alpha_b, field, f, 2))))))
 
-for i in stats[:4]:
-    for j in stats[:4]:
+for i in stats[:5]:
+    for j in stats[:5]:
         if i == j:
             continue
         alpha_a = addition(field[alphabet.index(j)], field[alphabet.index(i)], 2, False)
@@ -54,7 +54,8 @@ for i in stats[:4]:
         research.append([alpha, beta, res])
 seek_solution = sorted(research, key=lambda x: x[2])[0]
 key = [alphabet[field.index(i)] for i in seek_solution[:2]]
-print(key)
+# print(key)
+# print(decode_aph(chipher_text, key))
 # key = sorted(research, key=lambda x: x[2])[0][:2]
 # print(key)
 

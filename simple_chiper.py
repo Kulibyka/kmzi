@@ -1,7 +1,7 @@
 import numpy
 
 alphabet = 'абвгдежзийклмнопрстуфхцчшщъыьэюя'
-eng_alphabet = 'abcdefghijklmnopqrstuvwxyqz'
+eng_alphabet = 'abcdefghijklmnopqrstuvwxyz'
 secret_key = 'qwertyuiopasdfghjklzxcvbnm'
 
 
@@ -34,18 +34,18 @@ def multiplication(a, b, f, p):
     return ans.rjust(len(f) - 1, '0')
 
 
-def generate_keys(key1, key2, count, field, p):
+def generate_keys(key1, key2, count, field, f, p):
     global alphabet
-    res = [(field[alphabet.index(key1[0])], field[alphabet.index(key2[0])]),
-           (field[alphabet.index(key1[1])], field[alphabet.index(key2[1])])]
+    res = [(field[alphabet.index(key1[0])], field[alphabet.index(key1[1])]),
+           (field[alphabet.index(key2[0])], field[alphabet.index(key2[1])])]
     for _ in range(count - 2):
-        key1, key2 = key2, (multiplication(res[-1][0], res[-2][0], [2, -2, 1], p),
+        key1, key2 = key2, (multiplication(res[-1][0], res[-2][0], f, p),
                             addition(res[-1][1], res[-2][1], p))
         res.append(key2)
     return res
 
 
-def find_inverse_elem(elem, field, f, p):
+def find_inverse_elem(elem, field, f=(1, 1, -1, 0, 1, 1), p=2):
     for try_elem in field:
         if int(multiplication(elem, try_elem, f, p)) == 1:
             return try_elem
@@ -97,7 +97,7 @@ def encode_aph_rec(message, key1, key2, f=(1, 1, -1, 0, 1, 1), p=2, n=5):
         return 'Ошибка ключа'
     message = message.lower()
     field = make_field(p, n)
-    keys = generate_keys(key1, key2, len(message), field, p)
+    keys = generate_keys(key1, key2, len(message), field, f, p)
     res = []
     for i in range(len(message)):
         if message[i] not in alphabet:
@@ -113,8 +113,7 @@ def decode_aph_rec(message, key1, key2, f=(1, 1, -1, 0, 1, 1), p=2, n=5):
     global alphabet
     message = message.lower()
     field = make_field(p, n)
-    keys = generate_keys(key1, key2, len(message), field, p)
-    print(keys)
+    keys = generate_keys(key1, key2, len(message), field, f, p)
     res = []
     for i in range(len(message)):
         char = message[i]
@@ -138,8 +137,8 @@ def decode_substitution(message, key: str):
     return ''.join([eng_alphabet[key.index(char)] if char in key else char for char in message.lower()])
 
 
-# z = make_field(2, 5)
-# print(z)
+field = make_field(2, 5)
+
 # print(z[alphabet.index('н')], z[alphabet.index('ж')])
 # print(z[alphabet.index('г')], z[alphabet.index('д')], z[alphabet.index('е')])
 
@@ -160,31 +159,24 @@ text = 'A man appeared on the corner the cat had been watching, appeared so sudd
        ' buckled boots. His blue eyes were light, bright, and sparkling behind half-moon spectacles and' \
        ' his nose was very long and crooked, as though it had been broken at least twice. This man’s' \
        ' name was Albus Dumbledore.'
-# z = encode_substitution(text, secret_key)
+
+# z = encode_substitution('cryptography', secret_key)
 # print(z)
 # print(decode_substitution(z, secret_key))
-
-text = 'Потом говорили, что человек этот пришел с севера, со стороны Канатчиковых ворот. Он шел, а навьюченную' \
-       ' лошадь вел под уздцы. Надвигался вечер, и лавки канатчиков и шорников уже закрылись, а улочка опустела.' \
-       ' Было тепло, но на человеке был черный плащ, накинутый на плечи. Он обращал на себя внимание. Путник ' \
-       'остановился перед трактиром «Старая Преисподняя», постоял немного, прислушиваясь к гулу голосов. Трактир,' \
-       ' как всегда в это время, был полон народу. Незнакомец не вошел в «Старую Преисподнюю», а повел лошадь дальше, ' \
-       'вниз по улочке к другому трактиру, поменьше, который назывался «У Лиса». Здесь было пустовато – ' \
-       'трактир пользовался не лучшей репутацией. Трактирщик поднял голову от бочки с солеными огурцами ' \
-       'и смерил гостя взглядом. Чужак, все еще в плаще, стоял перед стойкой твердо, неподвижно и молчал.'
-
-# r = encode_aph(text, ('л', 'ц'))
+# print(encode_substitution('cryptography', secret_key))
+# r = encode_aph('криптография', ('л', 'ц'))
 # print(r)
-field = make_field(2, 5)
-print(field[alphabet.index('к')])
-# print(field[alphabet.index('в')])
-# print(field[alphabet.index('о')])
-# print(field[alphabet.index('е')], 'e')
-print(field[alphabet.index('л')])
-# print(field[alphabet.index('ц')])
-print(find_inverse_elem('01011', field, [1, 1, -1, 0, 1, 1], 2), 9999)
+# print(decode_aph(r, ('л', 'ц')))
+# field = make_field(2, 5)
+# print(find_inverse_elem('00101', field))
+# print(alphabet[field.index('00100')])
+r = encode_aph_rec('криптография', ('л', 'ц'), ('з', 'и'))
+print(r)
+print(decode_aph_rec(r, ('л', 'ц'), ('з', 'и')))
+# print(multiplication('11101', '11011', (1, 1, -1, 0, 1, 1), 2))
+
+
+# print(find_inverse_elem('01011', field, [1, 1, -1, 0, 1, 1], 2), 9999)
 # print(addition(field[alphabet.index('к')], field[alphabet.index('в')], 2, False))
-# print(addition(field[alphabet.index('е')], field[alphabet.index('о')], 2, False))
-# print(encode_aph('о', ('л', 'ц')))
-# print(encode_aph('е', ('л', 'ц')))
-# print(decode_aph(r, ('б', 'к')))
+
+
