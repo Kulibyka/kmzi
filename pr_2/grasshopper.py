@@ -1,5 +1,6 @@
 import numpy
 import binascii
+import math
 
 
 def convert(num, base=2, n=8):
@@ -128,41 +129,42 @@ def x(k, a):
     return [a[i] ^ k[i] for i in range(16)]
 
 
-def encryption(text, keys):
-    for i in range(9):
-        text = x(text, keys[i])
-        text = s(text)
-        text = l_transformation(text)
-    cipher_text = x(text, keys[9])
-    with open("cipher.txt", "w") as f:
-        f.write(binascii.hexlify(bytearray(cipher_text)).decode("UTF-8"))
-    f.close()
-    return cipher_text
+def encryption(msg, keys):
+    write_file = open("cipher.txt", "w")
+    for i in range(math.ceil(len(msg) / 16)):
+        text = msg[16 * i:16 * (i + 1)]
+        for j in range(9):
+            text = x(text, keys[j])
+            text = s(text)
+            text = l_transformation(text)
+        cipher_text = x(text, keys[9])
+        write_file.write(binascii.hexlify(bytearray(cipher_text)).decode("UTF-8"))
+    write_file.close()
 
 
-def decryption(text, keys):
-    for i in range(1, 10):
-        text = x(text, keys[-i])
-        text = l_inv_transformation(text)
-        text = s_inv(text)
-    open_text = x(text, keys[0])
-    with open("open.txt", "w") as f:
-        f.write(binascii.hexlify(bytearray(open_text)).decode("UTF-8"))
-    f.close()
-    return open_text
+def decryption(msg, keys):
+    write_file = open("open.txt", "w")
+    for i in range(math.ceil(len(msg) / 16)):
+        text = msg[16 * i:16 * (i + 1)]
+        for j in range(1, 10):
+            text = x(text, keys[-j])
+            text = l_inv_transformation(text)
+            text = s_inv(text)
+        cipher_text = x(text, keys[0])
+        write_file.write(binascii.hexlify(bytearray(cipher_text)).decode("UTF-8"))
+    write_file.close()
 
 
 key = list(binascii.unhexlify("8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef"))
-print(f'Ключом является строка "8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef"')
 with open("message.txt", "r") as f:
     file = f.read()
-    print(f'На вход поступила строка "{file}"')
     message = list(binascii.unhexlify(file))
-f.close()
 key = [key[:16], key[16:]] + make_keys([key[:16], key[16:]])
-ans = encryption(message, key)
-print(f'Результат зашифрования "{binascii.hexlify(bytearray(ans)).decode("UTF-8")}"')
-res = decryption(ans, key)
-print(f'Результат расшифрования "{binascii.hexlify(bytearray(res)).decode("UTF-8")}"')
+encryption(message, key)
+with open("cipher.txt", "r") as f:
+    file = f.read()
+    message = list(binascii.unhexlify(file))
+    print(message)
+decryption(message, key)
 
 
