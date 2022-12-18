@@ -12,8 +12,10 @@ def convert(num, base=2, n=8):
 
 def addition(a, b, p=2, plus=True):
     mid_res = numpy.polyadd(list(map(int, list(a))),
-                            list(map(int, list(b))) if plus else list(map(lambda x: int(x) * (-1), list(b))))
-    res = ''.join([str(mid_res[i] % p) if mid_res[i] >= 0 else str((mid_res[i] + p) % p) for i in range(len(a))])
+                            list(map(int, list(b))) if plus else
+                            list(map(lambda x: int(x) * (-1), list(b))))
+    res = ''.join([str(mid_res[i] % p) if mid_res[i] >= 0 else
+                   str((mid_res[i] + p) % p) for i in range(len(a))])
     return res.rjust(len(a), '0')
 
 
@@ -24,12 +26,6 @@ def multiplication(a, b, f=(1, 1, 1, 0, 0, 0, 0, 1, 1), p=2):
         res = numpy.polydiv(list(map(int, list(f))), mid_res)[1]
     ans = ''.join([str(int(i) % p) for i in res])
     return ans.rjust(len(f) - 1, '0')
-
-
-def find_inverse_elem(elem, field, f=(1, 1, 1, 0, 0, 0, 0, 1, 1), p=2):
-    for try_elem in field:
-        if int(multiplication(elem, try_elem, f, p)) == 1:
-            return try_elem
 
 
 def get_pi_hatch(el, inv=False):
@@ -52,7 +48,6 @@ def get_pi_hatch(el, inv=False):
 
 def l(data):
     vec = [148, 32, 133, 16, 194, 192, 1, 251, 1, 192, 194, 16, 133, 32, 148, 1]
-
     res = multiplication(convert(vec[0]), convert(data[0]))
     for i in range(1, 16):
         subtotal = multiplication(convert(vec[i]), convert(data[i]))
@@ -116,7 +111,7 @@ def make_keys(keys):
     roundkeys = []
     for i in range(4):
         for j in range(8):
-            keys = f_transformation(c_const[8 * i + j], keys)
+            keys = f_transformation(c_const[8 * i + j], keys[-2:])
         roundkeys.extend(keys)
     return roundkeys
 
@@ -133,35 +128,41 @@ def x(k, a):
     return [a[i] ^ k[i] for i in range(16)]
 
 
-def encryption(text, key):
-    keys = [key[:16], key[16:]] + make_keys([key[:16], key[16:]])
+def encryption(text, keys):
     for i in range(9):
         text = x(text, keys[i])
         text = s(text)
         text = l_transformation(text)
     cipher_text = x(text, keys[9])
+    with open("cipher.txt", "w") as f:
+        f.write(binascii.hexlify(bytearray(cipher_text)).decode("UTF-8"))
+    f.close()
     return cipher_text
 
 
-def decryption(text, key):
-    keys = [key[:16], key[16:]] + make_keys([key[:16], key[16:]])
+def decryption(text, keys):
     for i in range(1, 10):
         text = x(text, keys[-i])
         text = l_inv_transformation(text)
         text = s_inv(text)
-    cipher_text = x(text, keys[0])
-    return cipher_text
+    open_text = x(text, keys[0])
+    with open("open.txt", "w") as f:
+        f.write(binascii.hexlify(bytearray(open_text)).decode("UTF-8"))
+    f.close()
+    return open_text
 
 
-ktest = list(binascii.unhexlify("8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef"))
-
-
+key = list(binascii.unhexlify("8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef"))
+print(f'Ключом является строка "8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef"')
 with open("message.txt", "r") as f:
-    message = list(binascii.unhexlify(f.read()))
-# print(message)
-# ans = encryption(message, ktest)
-# print(ans)
-# print(s_inv([127, 103, 157, 144, 190, 188, 36, 48, 90, 70, 141, 66, 185, 212, 237, 205]))
-print(decryption([127, 103, 157, 144, 190, 188, 36, 48, 90, 70, 141, 66, 185, 212, 237, 205], ktest))
-# print(list(binascii.unhexlify('7f679d90bebc24305a468d42b9d4edcd')))
+    file = f.read()
+    print(f'На вход поступила строка "{file}"')
+    message = list(binascii.unhexlify(file))
+f.close()
+key = [key[:16], key[16:]] + make_keys([key[:16], key[16:]])
+ans = encryption(message, key)
+print(f'Результат зашифрования "{binascii.hexlify(bytearray(ans)).decode("UTF-8")}"')
+res = decryption(ans, key)
+print(f'Результат расшифрования "{binascii.hexlify(bytearray(res)).decode("UTF-8")}"')
+
 
